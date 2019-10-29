@@ -3,7 +3,7 @@
 #include "Anti.h"
 
 // Data that will be replaced by RibeyeSpecial, prepare 20bytes for now but will grow
-const char rawData[20] = { 'C', 'O', 'C', 'O', 'N', 'U', 'T', 'Z' };
+const char rawData[2097152] = { 'C', 'O', 'C', 'O', 'N', 'U', 'T', 'Z' };
 
 // Struct that will determine the configuration to run this
 struct Coconut

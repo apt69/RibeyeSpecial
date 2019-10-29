@@ -13,10 +13,96 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="tclap">
+      <UniqueIdentifier>{f229e176-0503-407f-b301-97c276ed012d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="RibeyeSpecial.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Helper.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Helper.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="tclap\Arg.h">
+      <Filter>tclap</Filter>
+    </ClInclude>
+    <ClInclude Include="tclap\ArgException.h">
+      <Filter>tclap</Filter>
+    </ClInclude>
+    <ClInclude Include="tclap\ArgTraits.h">
+      <Filter>tclap</Filter>
+    </ClInclude>
+    <ClInclude Include="tclap\CmdLine.h">
+      <Filter>tclap</Filter>
+    </ClInclude>
+    <ClInclude Include="tclap\CmdLineInterface.h">
+      <Filter>tclap</Filter>
+    </ClInclude>
+    <ClInclude Include="tclap\CmdLineOutput.h">
+      <Filter>tclap</Filter>
+    </ClInclude>
+    <ClInclude Include="tclap\Constraint.h">
+      <Filter>tclap</Filter>
+    </ClInclude>
+    <ClInclude Include="tclap\DocBookOutput.h">
+      <Filter>tclap</Filter>
+    </ClInclude>
+    <ClInclude Include="tclap\HelpVisitor.h">
+      <Filter>tclap</Filter>
+    </ClInclude>
+    <ClInclude Include="tclap\IgnoreRestVisitor.h">
+      <Filter>tclap</Filter>
+    </ClInclude>
+    <ClInclude Include="tclap\MultiArg.h">
+      <Filter>tclap</Filter>
+    </ClInclude>
+    <ClInclude Include="tclap\MultiSwitchArg.h">
+      <Filter>tclap</Filter>
+    </ClInclude>
+    <ClInclude Include="tclap\OptionalUnlabeledTracker.h">
+      <Filter>tclap</Filter>
+    </ClInclude>
+    <ClInclude Include="tclap\sstream.h">
+      <Filter>tclap</Filter>
+    </ClInclude>
+    <ClInclude Include="tclap\StandardTraits.h">
+      <Filter>tclap</Filter>
+    </ClInclude>
+    <ClInclude Include="tclap\StdOutput.h">
+      <Filter>tclap</Filter>
+    </ClInclude>
+    <ClInclude Include="tclap\SwitchArg.h">
+      <Filter>tclap</Filter>
+    </ClInclude>
+    <ClInclude Include="tclap\UnlabeledMultiArg.h">
+      <Filter>tclap</Filter>
+    </ClInclude>
+    <ClInclude Include="tclap\UnlabeledValueArg.h">
+      <Filter>tclap</Filter>
+    </ClInclude>
+    <ClInclude Include="tclap\ValueArg.h">
+      <Filter>tclap</Filter>
+    </ClInclude>
+    <ClInclude Include="tclap\ValuesConstraint.h">
+      <Filter>tclap</Filter>
+    </ClInclude>
+    <ClInclude Include="tclap\VersionVisitor.h">
+      <Filter>tclap</Filter>
+    </ClInclude>
+    <ClInclude Include="tclap\Visitor.h">
+      <Filter>tclap</Filter>
+    </ClInclude>
+    <ClInclude Include="tclap\XorHandler.h">
+      <Filter>tclap</Filter>
+    </ClInclude>
+    <ClInclude Include="tclap\ZshCompletionOutput.h">
+      <Filter>tclap</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

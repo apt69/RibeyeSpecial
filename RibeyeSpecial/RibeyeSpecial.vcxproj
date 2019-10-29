@@ -72,6 +72,7 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
+    <IncludePath>$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
@@ -92,6 +93,7 @@
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <AdditionalIncludeDirectories>$(ProjectDir)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -157,7 +159,36 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Helper.cpp" />
     <ClCompile Include="RibeyeSpecial.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Helper.h" />
+    <ClInclude Include="tclap\Arg.h" />
+    <ClInclude Include="tclap\ArgException.h" />
+    <ClInclude Include="tclap\ArgTraits.h" />
+    <ClInclude Include="tclap\CmdLine.h" />
+    <ClInclude Include="tclap\CmdLineInterface.h" />
+    <ClInclude Include="tclap\CmdLineOutput.h" />
+    <ClInclude Include="tclap\Constraint.h" />
+    <ClInclude Include="tclap\DocBookOutput.h" />
+    <ClInclude Include="tclap\HelpVisitor.h" />
+    <ClInclude Include="tclap\IgnoreRestVisitor.h" />
+    <ClInclude Include="tclap\MultiArg.h" />
+    <ClInclude Include="tclap\MultiSwitchArg.h" />
+    <ClInclude Include="tclap\OptionalUnlabeledTracker.h" />
+    <ClInclude Include="tclap\sstream.h" />
+    <ClInclude Include="tclap\StandardTraits.h" />
+    <ClInclude Include="tclap\StdOutput.h" />
+    <ClInclude Include="tclap\SwitchArg.h" />
+    <ClInclude Include="tclap\UnlabeledMultiArg.h" />
+    <ClInclude Include="tclap\UnlabeledValueArg.h" />
+    <ClInclude Include="tclap\ValueArg.h" />
+    <ClInclude Include="tclap\ValuesConstraint.h" />
+    <ClInclude Include="tclap\VersionVisitor.h" />
+    <ClInclude Include="tclap\Visitor.h" />
+    <ClInclude Include="tclap\XorHandler.h" />
+    <ClInclude Include="tclap\ZshCompletionOutput.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
