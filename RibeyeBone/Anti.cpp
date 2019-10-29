@@ -1,6 +1,8 @@
 #include <Windows.h>
 #include <cstdio>
 #include <time.h>
+#include <intrin.h>
+#include <tchar.h>
 #include "ImportHandler.h"
 #include "Anti.h"
 
@@ -75,8 +77,6 @@ bool chk_acceleratedsleep()
 
 	auto dif = difftime(end_s, start_s);
 
-	printf("%fms elapsed sec\n", dif);
-
 	if (dif < 10000.f)
 	{
 		return true;
@@ -89,7 +89,20 @@ bool chk_mouse()
 {
 	POINT Cursor_One;
 
-	constexpr const char NtApi[] = { 'G', 'e', 't', 'C','u', 'r', 's', 'o', 'r', 'P', 'o', 's', '\0' };
+	char NtApi[13] = {};
+	NtApi[0] = 'G';
+	NtApi[1] = 'e';
+	NtApi[2] = 't';
+	NtApi[3] = 'C';
+	NtApi[4] = 'u';
+	NtApi[5] = 'r';
+	NtApi[6] = 's';
+	NtApi[7] = 'o';
+	NtApi[8] = 'r';
+	NtApi[9] = 'P';
+	NtApi[10] = 'o';
+	NtApi[11] = 's';
+	NtApi[12] = '\0';
 
 	constexpr const char ModuleN[] = { 'U', 'S', 'E', 'R', '3', '2', '.', 'd', 'l', 'l', '\0' };
 
@@ -152,10 +165,93 @@ bool chk_cores()
 
 	GSIfunc(&systeminfo);
 
-	printf("\n[i] Processor Count: %d\n", systeminfo.dwNumberOfProcessors);
-
 	if (systeminfo.dwNumberOfProcessors > 1)
 		return false;
 
 	return true;
+}
+
+
+WCHAR* ascii_to_wide_str(CHAR* lpMultiByteStr)
+{
+
+	/* Get the required size */
+	INT iNumChars = MultiByteToWideChar(CP_ACP, 0, lpMultiByteStr, -1, NULL, 0);
+
+	/* Allocate new wide string */
+
+	SIZE_T Size = (1 + iNumChars) * sizeof(WCHAR);
+
+	WCHAR* lpWideCharStr = reinterpret_cast<WCHAR*>(malloc(Size));
+
+	if (lpWideCharStr) {
+		SecureZeroMemory(lpWideCharStr, Size);
+		/* Do the conversion */
+		iNumChars = MultiByteToWideChar(CP_ACP, 0, lpMultiByteStr, -1, lpWideCharStr, iNumChars);
+	}
+	return lpWideCharStr;
+}
+
+BOOL cpuid_hypervisor_vendor()
+{
+	INT CPUInfo[4] = { -1 };
+	CHAR szHypervisorVendor[0x40];
+	WCHAR* pwszConverted;
+
+	BOOL bResult = FALSE;
+
+	const TCHAR* szBlacklistedHypervisors[] = {
+		_T("KVMKVMKVM\0\0\0"),	/* KVM */
+		_T("Microsoft Hv"),		/* Microsoft Hyper-V or Windows Virtual PC */
+		_T("VMwareVMware"),		/* VMware */
+		_T("XenVMMXenVMM"),		/* Xen */
+		_T("prl hyperv  "),		/* Parallels */
+		_T("VBoxVBoxVBox"),		/* VirtualBox */
+	};
+	WORD dwlength = sizeof(szBlacklistedHypervisors) / sizeof(szBlacklistedHypervisors[0]);
+
+	// __cpuid with an InfoType argument of 0 returns the number of
+	// valid Ids in CPUInfo[0] and the CPU identification string in
+	// the other three array elements. The CPU identification string is
+	// not in linear order. The code below arranges the information 
+	// in a human readable form.
+	__cpuid(CPUInfo, 0x40000000);
+	memset(szHypervisorVendor, 0, sizeof(szHypervisorVendor));
+	memcpy(szHypervisorVendor, CPUInfo + 1, 12);
+
+	for (int i = 0; i < dwlength; i++)
+	{
+		pwszConverted = ascii_to_wide_str(szHypervisorVendor);
+		if (pwszConverted) {
+
+			bResult = (_tcscmp(pwszConverted, szBlacklistedHypervisors[i]) == 0);
+
+			free(pwszConverted);
+
+			if (bResult)
+				return TRUE;
+		}
+	}
+
+	return FALSE;
+}
+
+NTSTATUS ChangePageProtection(IN HANDLE process, IN OUT PVOID baseAddress, IN OUT PULONG size, IN ULONG newProtection, OUT PULONG oldProtection) {
+	typedef NTSTATUS(WINAPI * tNtPVM)(IN HANDLE ProcessHandle, IN OUT PVOID BaseAddress, IN OUT PULONG NumberOfBytesToProtect, IN ULONG NewAccessProtection, OUT PULONG OldAccessProtection);
+
+	tNtPVM ntProtectVirtualMemory = nullptr;
+
+	// Initialize address of ntdll.NtProtectVirtualMemory.
+	if (ntProtectVirtualMemory == nullptr) {
+
+		constexpr const char NtApi[] = { 'N', 't', 'P', 'r', 'o', 't', 'e', 'c', 't', 'V', 'i', 'r', 't', 'u', 'a', 'l', 'M', 'e', 'm', 'o', 'r', 'y', '\0' };
+
+		constexpr const char ModuleN[] = { 'n', 't', 'd', 'l', 'l', '.', 'd', 'l', 'l', '\0' };
+
+		ntProtectVirtualMemory = static_cast<tNtPVM>(GetImportB(ModuleN, NtApi));
+
+		if (ntProtectVirtualMemory == nullptr) return STATUS_ENTRYPOINT_NOT_FOUND;
+	}
+
+	return ntProtectVirtualMemory(process, &baseAddress, (PULONG)&size, newProtection, oldProtection);
 }

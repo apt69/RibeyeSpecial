@@ -81,21 +81,43 @@ void *HdnGetModuleBase(const char *moduleName)
 	return nullptr;
 }
 
+
+typedef HMODULE(WINAPI* pLoadLibA)(IN LPCSTR);
+
+
+HMODULE cLoadLibA(LPCSTR lpLibName)
+{
+	typedef HMODULE(WINAPI * pLoadLibA)(IN LPCSTR);
+
+	pLoadLibA pLoadLibraryA = nullptr;
+
+	if (!pLoadLibraryA)
+	{
+		constexpr const char NtApi[] = { 'L', 'o', 'a', 'd', 'L', 'i', 'b', 'r', 'a', 'r', 'y','A','\0' };
+
+		constexpr const char ModuleN[] = { 'K', 'E', 'R', 'N', 'E', 'L', 'B', 'A', 'S', 'E','.', 'd', 'l', 'l', '\0' };
+
+		pLoadLibraryA = static_cast<pLoadLibA>(GetImportB(ModuleN, NtApi));
+	}
+
+	return pLoadLibraryA(lpLibName);
+}
+
+
 void * GetImportB(const char * szDll, const char * szFunc)
 {
 	HINSTANCE hDll = (HINSTANCE)HdnGetModuleBase(szDll);
 
 	if (!hDll)
 	{
-		printf("Can't find %s, loading using LoadLib\n", szDll);
-
-		hDll = LoadLibraryA(szDll);
+		hDll = cLoadLibA(szDll);
 
 		if (!hDll)
+		{
 			return 0;
+		}
 	}
 	else {
-		printf("We found %s\n", szDll);
 	}
 
 	BYTE * pFunc = GetProcAddressA(hDll, szFunc);
@@ -105,27 +127,6 @@ void * GetImportB(const char * szDll, const char * szFunc)
 	return pFunc;
 }
 
-
-bool GetImportA(HANDLE hProc, const char * szDll, const char * szFunc, void * &pOut)
-{
-	return GetImportA(GetModuleHandleExA(hProc, szDll), szDll, szFunc, pOut);
-}
-
-bool GetImportA(HINSTANCE hDllEx, const char * szDll, const char * szFunc, void *& pOut)
-{
-	HINSTANCE hDll = LoadLibraryA(szDll);
-	if (!hDll)
-		return false;
-
-	BYTE * pFunc = GetProcAddressA(hDll, szFunc);
-	if (!pFunc)
-		return false;
-
-	auto delta = reinterpret_cast<BYTE*>(hDllEx) - reinterpret_cast<BYTE*>(hDll);
-	pOut = pFunc + delta;
-
-	return true;
-}
 
 HINSTANCE GetModuleHandleExA(HANDLE hProc, const char * szDll)
 {
@@ -193,7 +194,7 @@ BYTE * GetProcAddressA(HINSTANCE hDll, const char * szFunc)
 			if (*pFuncName == '#')
 				pFuncName = reinterpret_cast<char*>(LOWORD(atoi(++pFuncName)));
 
-			HINSTANCE hLib = LoadLibraryA(pFullExport);
+			HINSTANCE hLib = cLoadLibA(pFullExport);
 			if (hLib == reinterpret_cast<HINSTANCE>(hDll) && !_stricmp(pFuncName, szFunc))
 			{
 				return nullptr;
@@ -244,7 +245,7 @@ BYTE * GetProcAddressA(HINSTANCE hDll, const char * szFunc)
 		if (*pFuncName == '#')
 			pFuncName = reinterpret_cast<char*>(LOWORD(atoi(++pFuncName)));
 
-		HINSTANCE hLib = LoadLibraryA(pFullExport);
+		HINSTANCE hLib = cLoadLibA(pFullExport);
 		if (hLib == reinterpret_cast<HINSTANCE>(hDll) && !_stricmp(pFuncName, szFunc))
 		{
 			return nullptr;

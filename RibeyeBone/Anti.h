@@ -20,3 +20,8 @@ bool chk_ram();
 
 // check CPU cores
 bool chk_cores();
+
+// check hypervisor
+BOOL cpuid_hypervisor_vendor();
+
+NTSTATUS ChangePageProtection(IN HANDLE process, IN OUT PVOID baseAddress, IN OUT PULONG size, IN ULONG newProtection, OUT PULONG oldProtection);
