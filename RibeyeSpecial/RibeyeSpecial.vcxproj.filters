@@ -16,6 +16,9 @@
     <Filter Include="tclap">
       <UniqueIdentifier>{f229e176-0503-407f-b301-97c276ed012d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="payloads">
+      <UniqueIdentifier>{8a049d05-a675-472e-a8c2-89124ae34333}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="RibeyeSpecial.cpp">
@@ -103,6 +106,15 @@
     </ClInclude>
     <ClInclude Include="tclap\ZshCompletionOutput.h">
       <Filter>tclap</Filter>
+    </ClInclude>
+    <ClInclude Include="RibeyeBone64.h">
+      <Filter>payloads</Filter>
+    </ClInclude>
+    <ClInclude Include="RibeyeBone86.h">
+      <Filter>payloads</Filter>
+    </ClInclude>
+    <ClInclude Include="donut.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
