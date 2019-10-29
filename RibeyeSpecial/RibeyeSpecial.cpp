@@ -142,6 +142,7 @@ int main(int argc, char** argv)
 		cmd.add(outputname);
 		cmd.add(sleeptime);
 
+		TCLAP::SwitchArg bAll("e", "all", "Enable all checks with default values", cmd, false);
 		TCLAP::SwitchArg bVirtual("v", "vm", "Detect VM using CPUID", cmd, false);
 		TCLAP::SwitchArg bSleep("s", "sleep", "Sleep to evade sandbox", cmd, false);
 		TCLAP::SwitchArg bPrime("p", "prime", "Prime calculation to evade sandbox", cmd, false);
@@ -153,18 +154,37 @@ int main(int argc, char** argv)
 
 		// Parse the argv array.
 		cmd.parse(argc, argv);
-		coconut.sleep = bSleep.getValue();
-		coconut.sleepTime = sleeptime.getValue();
-		coconut.antivm = bVirtual.getValue();
-		coconut.prime = bPrime.getValue();
-		coconut.mouse = bMouse.getValue();
-		coconut.acceleratedsleep = bAccel.getValue();
-		coconut.debugger = bDebugger.getValue();
-		coconut.ram = bRam.getValue();
-		coconut.cpu_core = bCore.getValue();;
-		
+
+		if (bAll.getValue())
+		{
+			coconut.sleep = true;
+			coconut.sleepTime = 7000;
+			coconut.antivm = true;
+			coconut.prime = true;
+			coconut.mouse = true;
+			coconut.ram = true;
+			coconut.acceleratedsleep = true;
+			coconut.debugger = true;
+			coconut.cpu_core = true;
+		}
+		else
+		{
+			coconut.sleep = bSleep.getValue();
+			coconut.sleepTime = sleeptime.getValue();
+			coconut.antivm = bVirtual.getValue();
+			coconut.prime = bPrime.getValue();
+			coconut.mouse = bMouse.getValue();
+			coconut.acceleratedsleep = bAccel.getValue();
+			coconut.debugger = bDebugger.getValue();
+			coconut.ram = bRam.getValue();
+			coconut.cpu_core = bCore.getValue();;
+
+		}
+
 		std::string targetFile = filepath.getValue();
+
 		payload_output = outputname.getValue();
+
 		writeShellCode(targetFile.data());
 
 	}

