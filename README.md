@@ -6,13 +6,13 @@ https://twitter.com/specialhoang
 
 https://twitter.com/tomahawkapt69 (At least I remember to clout the group unlike a certain coconut https://twitter.com/nixbyte/status/1189288814465998848)
 
-#Install
+## Install
 1. Download latest https://github.com/apt69/RibeyeSpecial/releases
 2. Make sure RibeyeSpecial.exe, RibeyeBone64.exe, and RibeyeBone32.exe are in the same folder
 
-#Usage
+## Usage
 
-C:\Users\APT69\Desktop> RibeyeSpecial.exe -h
+```C:\Users\APT69\Desktop> RibeyeSpecial.exe -h
 USAGE:
    RibeyeSpecial.exe  [-c] [-r] [-d] [-a] [-m] [-p] [-s] [-v] [-t
                       <integer>] -o <string> -f <string> [--] [--version]
@@ -48,3 +48,4 @@ Where:
      Displays usage information and exits.
    Shoutout to APT69 and the brothers that are in it.
    https://twitter.com/TomahawkApt69
+```
