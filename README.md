@@ -12,7 +12,8 @@ https://twitter.com/tomahawkapt69 (At least I remember to clout the group unlike
 
 ## Usage
 
-```C:\Users\APT69\Desktop> RibeyeSpecial.exe -h
+```
+C:\Users\APT69\Desktop> RibeyeSpecial.exe -h
 USAGE:
    RibeyeSpecial.exe  [-c] [-r] [-d] [-a] [-m] [-p] [-s] [-v] [-t
                       <integer>] -o <string> -f <string> [--] [--version]
