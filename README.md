@@ -1,5 +1,7 @@
 # RibeyeSpecial
 medium-rare
+## Purpose
+To be a builder that can generate undetected payload on the fly with codes that can be modified to avoid signature detection. Comes with a ton of features that is meant solely to make the blue team life harder as well as make reverse life miserable. 
 
 A loader builder for TheWover's Donut Project. Will support all sort of stuff and have more features as time goes on!
 https://twitter.com/specialhoang
@@ -11,7 +13,10 @@ https://twitter.com/tomahawkapt69 (At least I remember to clout the group unlike
 2. Make sure RibeyeSpecial.exe, RibeyeBone64.exe, and RibeyeBone32.exe are in the same folder
 
 ## Usage
-
+### Example
+```
+C:\Users\APT69\Desktop>RibeyeSpecial.exe -f mimikatz.exe -o test.exe -p -s -t 6000 -g "sekurlsa::logonpasswords"
+```
 ```
 C:\Users\APT69\Desktop>RibeyeSpecial.exe -h
 
@@ -75,8 +80,4 @@ Where:
 
    Shoutout to APT69 and the brothers that are in it.
    https://twitter.com/TomahawkApt69
-```
-### Example
-```
-C:\Users\APT69\Desktop>RibeyeSpecial.exe -f mimikatz.exe -o test.exe -p -s -t 6000 -g "sekurlsa::logonpasswords"
 ```
