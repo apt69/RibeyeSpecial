@@ -1,4 +1,4 @@
-# RibeyeSpecial
+# RibeyeSpecial - STILL IN PROGRESS, DO NOT USE! I REPEAT - DO NOT USE
 medium-rare
 ## Purpose
 To be a builder that can generate undetected payload on the fly with codes that can be modified to avoid signature detection. Comes with a ton of features that is meant solely to make the blue team life harder as well as make reverse life miserable. 
