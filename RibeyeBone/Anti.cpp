@@ -4,6 +4,7 @@
 #include <intrin.h>
 #include <tchar.h>
 #include "ImportHandler.h"
+#include "xorstr.hpp"
 #include "Anti.h"
 
 typedef NTSTATUS(WINAPI *pNtDelayExecution)(IN BOOLEAN, IN PLARGE_INTEGER);
@@ -42,9 +43,9 @@ int ntSleep(int milisecond)
 {
 	LARGE_INTEGER DelayInterval;
 	
-	constexpr const char NtApi[] = { 'N', 't', 'D', 'e', 'l', 'a', 'y', 'E', 'x', 'e', 'c', 'u', 't', 'i', 'o', 'n', '\0'};
+	char* NtApi = xorstr("NtDelayExecution").crypt_get(); //{ 'N', 't', 'D', 'e', 'l', 'a', 'y', 'E', 'x', 'e', 'c', 'u', 't', 'i', 'o', 'n', '\0'};
 
-	constexpr const char ModuleN[] = { 'n', 't', 'd', 'l', 'l', '.', 'd', 'l', 'l', '\0'};
+	char* ModuleN = xorstr("ntdll.dll").crypt_get();
 
 	auto NtDelayExecution = static_cast<pNtDelayExecution>(GetImportB(ModuleN, NtApi));
 
@@ -62,9 +63,9 @@ int ntSleep(int milisecond)
 
 bool chk_acceleratedsleep()
 {
-	constexpr const char NtApi[] = { 'S', 'l', 'e', 'e','p', '\0' };
+	const char* NtApi = xorstr("Sleep").crypt_get(); //{ 'S', 'l', 'e', 'e','p', '\0' };
 
-	constexpr const char ModuleN[] = { 'K', 'E', 'R', 'N', 'E', 'L', '3', '2', '.', 'D', 'L', 'L', '\0' };
+	const char* ModuleN = xorstr("KERNEL32.DLL").crypt_get();
 
 	auto SleepFunc = static_cast<pSleep>(GetImportB(ModuleN, NtApi));
 
@@ -89,22 +90,9 @@ bool chk_mouse()
 {
 	POINT Cursor_One;
 
-	char NtApi[13] = {};
-	NtApi[0] = 'G';
-	NtApi[1] = 'e';
-	NtApi[2] = 't';
-	NtApi[3] = 'C';
-	NtApi[4] = 'u';
-	NtApi[5] = 'r';
-	NtApi[6] = 's';
-	NtApi[7] = 'o';
-	NtApi[8] = 'r';
-	NtApi[9] = 'P';
-	NtApi[10] = 'o';
-	NtApi[11] = 's';
-	NtApi[12] = '\0';
+	char * NtApi = xorstr("GetCursorPos").crypt_get();
 
-	constexpr const char ModuleN[] = { 'U', 'S', 'E', 'R', '3', '2', '.', 'd', 'l', 'l', '\0' };
+	char* ModuleN = xorstr("USER32.dll").crypt_get();
 
 	auto GetCursorFunc = static_cast<pGetCursorPos>(GetImportB(ModuleN, NtApi));
 
@@ -138,9 +126,9 @@ bool chk_ram()
 	MEMORYSTATUSEX status;
 	status.dwLength = sizeof(status);
 
-	constexpr const char NtApi[] = { 'G', 'l', 'o', 'b', 'a', 'l', 'M', 'e', 'm', 'o', 'r', 'y', 'S', 't', 'a', 't', 'u', 's', 'E', 'x', '\0' };
+	const char* NtApi = xorstr("GlobalMemoryStatusEx").crypt_get();	//{ 'G', 'l', 'o', 'b', 'a', 'l', 'M', 'e', 'm', 'o', 'r', 'y', 'S', 't', 'a', 't', 'u', 's', 'E', 'x', '\0' };
 
-	constexpr const char ModuleN[] = { 'K', 'E', 'R', 'N', 'E', 'L', '3', '2', '.', 'D', 'L', 'L', '\0' };
+	char* ModuleN = xorstr("USER32.dll").crypt_get();
 
 	auto mGMS = static_cast<pMemoryStatus>(GetImportB(ModuleN, NtApi));
 
@@ -157,9 +145,9 @@ bool chk_cores()
 	SYSTEM_INFO   systeminfo;
 	unsigned long bytesreturned;
 
-	constexpr const char NtApi[] = { 'G', 'e', 't', 'S', 'y', 's', 't', 'e', 'm', 'I', 'n', 'f', 'o', '\0' };
+	const char* NtApi = xorstr("GetSystemInfo").crypt_get();    //{ 'G', 'e', 't', 'S', 'y', 's', 't', 'e', 'm', 'I', 'n', 'f', 'o', '\0' };
 
-	constexpr const char ModuleN[] = { 'K', 'E', 'R', 'N', 'E', 'L', 'B', 'A', 'S', 'E','.', 'd', 'l', 'l', '\0' };
+	const char* ModuleN = xorstr("KERNELBASE.dll").crypt_get();   //{ 'K', 'E', 'R', 'N', 'E', 'L', 'B', 'A', 'S', 'E','.', 'd', 'l', 'l', '\0' };
 
 	auto GSIfunc = static_cast<pGSI>(GetImportB(ModuleN, NtApi));
 
@@ -171,7 +159,14 @@ bool chk_cores()
 	return true;
 }
 
-
+//const wchar_t* szBlacklistedHypervisors[] = {
+//	(xorstr(L"KVMKVMKVM\0\0\0").crypt_get()),	/* KVM */
+//	(xorstr(L"Microsoft Hv").crypt_get()),		/* Microsoft Hyper-V or Windows Virtual PC */
+//	(xorstr(L"VMwareVMware").crypt_get()),		/* VMware */
+//	(xorstr(L"XenVMMXenVMM").crypt_get()),		/* Xen */
+//	(xorstr(L"prl hyperv  ").crypt_get()),		/* Parallels */
+//	(xorstr(L"VBoxVBoxVBox").crypt_get()),		/* VirtualBox */
+//};
 WCHAR* ascii_to_wide_str(CHAR* lpMultiByteStr)
 {
 
@@ -226,6 +221,8 @@ BOOL cpuid_hypervisor_vendor()
 
 			bResult = (_tcscmp(pwszConverted, szBlacklistedHypervisors[i]) == 0);
 
+
+
 			free(pwszConverted);
 
 			if (bResult)
@@ -235,7 +232,6 @@ BOOL cpuid_hypervisor_vendor()
 
 	return FALSE;
 }
-
 NTSTATUS ChangePageProtection(IN HANDLE process, IN OUT PVOID baseAddress, IN OUT PULONG size, IN ULONG newProtection, OUT PULONG oldProtection) {
 	typedef NTSTATUS(WINAPI * tNtPVM)(IN HANDLE ProcessHandle, IN OUT PVOID BaseAddress, IN OUT PULONG NumberOfBytesToProtect, IN ULONG NewAccessProtection, OUT PULONG OldAccessProtection);
 
@@ -244,9 +240,9 @@ NTSTATUS ChangePageProtection(IN HANDLE process, IN OUT PVOID baseAddress, IN OU
 	// Initialize address of ntdll.NtProtectVirtualMemory.
 	if (ntProtectVirtualMemory == nullptr) {
 
-		constexpr const char NtApi[] = { 'N', 't', 'P', 'r', 'o', 't', 'e', 'c', 't', 'V', 'i', 'r', 't', 'u', 'a', 'l', 'M', 'e', 'm', 'o', 'r', 'y', '\0' };
+		const char* NtApi = xorstr("NtProtectVirtualMemory").crypt_get(); //{ 'N', 't', 'P', 'r', 'o', 't', 'e', 'c', 't', 'V', 'i', 'r', 't', 'u', 'a', 'l', 'M', 'e', 'm', 'o', 'r', 'y', '\0' };
 
-		constexpr const char ModuleN[] = { 'n', 't', 'd', 'l', 'l', '.', 'd', 'l', 'l', '\0' };
+		char* ModuleN = xorstr("ntdll.dll").crypt_get(); //{ 'n', 't', 'd', 'l', 'l', '.', 'd', 'l', 'l', '\0' };
 
 		ntProtectVirtualMemory = static_cast<tNtPVM>(GetImportB(ModuleN, NtApi));
 

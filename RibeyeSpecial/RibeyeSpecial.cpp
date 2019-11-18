@@ -13,10 +13,8 @@
 #pragma comment(lib, "donut32.lib")
 #endif
 
-
 #define MAX_BUFFER 4097152
 // Struct that will determine the configuration to run this
-
 
 struct Coconut
 {
