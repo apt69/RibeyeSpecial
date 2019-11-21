@@ -29,7 +29,6 @@ int main()
 
 	if (cpuid_hypervisor_vendor())
 	{
-		printf("bad");
 		return 1;
 	}
 
